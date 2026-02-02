@@ -1,0 +1,31 @@
+{
+  "name": "book-budget-app",
+  "displayName": "Book Budget App",
+  "description": "A cross-platform app to manage books with Firebase",
+  "expo": {
+    "scheme": "bookbudgetapp",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-font",
+      "expo-web-browser",
+      "@react-native-community/datetimepicker"
+    ]
+  },
+  "plugins": [
+    [
+      "expo-image-picker",
+      {
+        "photosPermission": "The app accesses your photos to upload book covers.",
+        "cameraPermission": "The app uses camera to capture book covers."
+      }
+    ]
+  ]
+}
