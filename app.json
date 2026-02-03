@@ -1,14 +1,27 @@
 {
-  "name": "book-budget-app",
-  "displayName": "Book Budget App",
-  "description": "A cross-platform app to manage books with Firebase",
   "expo": {
-    "scheme": "bookbudgetapp",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "name": "book-budget-app",
+    "slug": "book-budget-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.n37le.budgetapp",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
     "web": {
       "favicon": "./assets/favicon.png"
     },
@@ -16,16 +29,19 @@
       "expo-asset",
       "expo-font",
       "expo-web-browser",
-      "@react-native-community/datetimepicker"
-    ]
-  },
-  "plugins": [
-    [
-      "expo-image-picker",
-      {
-        "photosPermission": "The app accesses your photos to upload book covers.",
-        "cameraPermission": "The app uses camera to capture book covers."
+      "@react-native-community/datetimepicker",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to upload book covers.",
+          "cameraPermission": "The app uses camera to capture book covers."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "aa6e5647-34c8-4cf9-bd3a-6472b4f00bad"
       }
-    ]
-  ]
+    }
+  }
 }
