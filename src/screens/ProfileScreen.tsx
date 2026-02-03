@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
+  Image,
+  ActivityIndicator,
 } from 'react-native';
 import { Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,11 +15,15 @@ import { useAuth } from '../context/AuthContext';
 import { useBudget } from '../context/BudgetContext';
 import { useTheme } from '../context/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import { storage } from '../config/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const ProfileScreen: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const { budgetBooks } = useBudget();
   const { isDarkMode, theme, toggleTheme } = useTheme();
+  const [uploading, setUploading] = React.useState(false);
 
   const stats = useMemo(() => {
     const totalBudgets = budgetBooks.length;
@@ -49,15 +55,77 @@ const ProfileScreen: React.FC = () => {
     ]);
   };
 
+  const pickImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to make this work!');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const selectedImage = result.assets[0];
+        await uploadImage(selectedImage.uri);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to pick image');
+      console.error(error);
+    }
+  };
+
+  const uploadImage = async (uri: string) => {
+    if (!user) return;
+    
+    try {
+      setUploading(true);
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      
+      const storageRef = ref(storage, `avatars/${user.uid}`);
+      await uploadBytes(storageRef, blob);
+      
+      const downloadURL = await getDownloadURL(storageRef);
+      await updateUser({ photoURL: downloadURL });
+      
+      Alert.alert('Success', 'Profile picture updated successfully');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to upload image');
+      console.error(error);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={[styles.profileSection, { backgroundColor: theme.surface }]}>
-          <View style={[styles.avatar, { backgroundColor: theme.primary }]}>
-            <Text style={styles.avatarText}>
-              {user?.displayName?.[0].toUpperCase() || user?.email?.[0].toUpperCase() || 'U'}
-            </Text>
-          </View>
+          <TouchableOpacity 
+            style={[styles.avatar, { backgroundColor: theme.primary }]}
+            onPress={pickImage}
+            disabled={uploading}
+          >
+            {uploading ? (
+              <ActivityIndicator color="#fff" />
+            ) : user?.photoURL ? (
+              <Image source={{ uri: user.photoURL }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avatarText}>
+                {user?.displayName?.[0].toUpperCase() || user?.email?.[0].toUpperCase() || 'U'}
+              </Text>
+            )}
+            <View style={styles.editIconContainer}>
+              <Ionicons name="camera" size={16} color="#fff" />
+            </View>
+          </TouchableOpacity>
 
           <Text style={[styles.name, { color: theme.text }]}>{user?.displayName || 'User'}</Text>
           <Text style={[styles.email, { color: theme.textSecondary }]}>{user?.email}</Text>
@@ -139,6 +207,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
+    position: 'relative',
+  },
+  avatarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  editIconContainer: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#6200ee',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
   },
   avatarText: {
     fontSize: 36,

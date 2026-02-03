@@ -1,135 +1,96 @@
-# This app is entirely vibecode b/c I am not familar with react native stack, i only guide it in term of security issue, testing feature, and architecture design. Please proceed with caution.
+# Vault - Personal Finance Tracker
 
-
-# Book Budget App Setup Guide
+A privacy-focused, cross-platform personal budget and expense tracking application built with React Native and Expo.
 
 ## Prerequisites
-- Node.js (v16+)
-- Expo CLI: `npm install -g expo-cli`
-- Firebase account with a Firestore project
+- Node.js (v18+)
+- Expo Go app on your phone (for mobile testing)
+- Firebase account (Free Spark plan)
 
 ## Setup Instructions
 
 ### 1. Install Dependencies
 ```bash
-cd budgetApp
+git clone <repository-url>
+cd vault
 npm install
 ```
 
 ### 2. Configure Firebase
-1. Go to [Firebase Console](https://console.firebase.google.com)
-2. Create a new project
-3. Create a Firestore database
-4. Enable authentication (Email/Password)
-5. *(Optional)* Set up Cloud Storage - **Note**: Cloud Storage requires a paid Firebase plan
-6. Get your Firebase config from Project Settings
+1.  Go to the [Firebase Console](https://console.firebase.google.com).
+2.  Create a new project (e.g., `budget-app-abdc9`).
+3.  Enable **Authentication** (Email/Password).
+4.  Enable **Firestore Database**.
+5.  Enable **Cloud Storage**.
 
 ### 3. Environment Variables
-1. Copy `.env.example` to `.env`
-2. Fill in your Firebase credentials:
-```
-FIREBASE_API_KEY=your_api_key
-FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-FIREBASE_APP_ID=your_app_id
-```
-
-### 4. Firestore Security Rules
-Set your Firestore rules to:
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /books/{document=**} {
-      allow read, write: if request.auth.uid == resource.data.userId;
-      allow create: if request.auth.uid != null;
-    }
-  }
-}
+Copy `.env.example` to `.env` and fill in your credentials from the Firebase Project Settings:
+```env
+EXPO_PUBLIC_FIREBASE_API_KEY=...
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=...
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+EXPO_PUBLIC_FIREBASE_APP_ID=...
 ```
 
-### 5. Cloud Storage Rules (Optional)
-**Note**: Cloud Storage requires Firebase to be on a paid plan (Blaze Plan).
-
-If using Cloud Storage, set your rules to:
-rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    match /book-covers/{allPaths=**} {
-      allow read, write: if request.auth.uid == request.resource.metadata.userId || request.auth.uid == resource.metadata.userId;
-    }
-  }
-}
-```
-
-### 6. Run the App
+### 4. Running the App
 ```bash
-# iOS
-npm run ios
-
-# Android
-npm run android
-
-# Web
-npm run web
-
-# Or with Expo
-npm start
+# Start development server
+npx expo start
 ```
+Scan the QR code with **Expo Go** (iOS/Android) or press `w` to open in the web browser.
+
+## Web Deployment & PWA
+To use Vault as a standalone app on your iPhone without a Mac:
+1.  **Build for Web**:
+    ```bash
+    npx expo export -p web
+    ```
+2.  **Deploy to Firebase**:
+    ```bash
+    npx firebase-tools deploy --only hosting
+    ```
+3.  **Install on iPhone**:
+    - Open your deployment URL in **Safari**.
+    - Tap the **Share** button.
+    - Select **Add to Home Screen**.
 
 ## Features
-✅ **Authentication** - Email/password signup and login with Firebase Auth
-✅ **Book Management** - Create, read, update, and delete books
-✅ **Cloud Storage** - Upload and store book cover images
-✅ **Real-time Sync** - Automatic sync across devices with Firestore
-✅ **Search & Filter** - Find books by title or author, filter by status
-✅ **Book Details** - Title, author, genre, pages, price, rating, notes, status, description
-✅ **User Profile** - View account info and logout
-✅ **Responsive Design** - Works on iOS, Android, and Web
+✅ **Secure Auth** - Firebase Email/Password authentication.
+✅ **Budget Books** - Organize your finances into custom books (e.g., Monthly, Vacation).
+✅ **Transaction Tracking** - Easily log income and expenses with categories and descriptions.
+✅ **Visual Analytics** - Interactive charts and filters to understand your spending habits.
+✅ **Custom Avatars** - Upload your own profile picture via Firebase Storage.
+✅ **Dark Mode** - Fully responsive dark and light themes.
+✅ **Cross-Platform** - Runs on iOS, Android, and Web.
 
 ## Project Structure
 ```
 src/
-├── App.tsx                    # Main app component
+├── App.tsx                    # Main entry point
 ├── config/
-│   └── firebase.ts           # Firebase configuration
+│   └── firebase.ts           # Firebase SDK initialization
 ├── context/
-│   ├── AuthContext.tsx       # Authentication logic
-│   └── BooksContext.tsx      # Books management logic
+│   ├── AuthContext.tsx       # Authentication & Profile management
+│   ├── BudgetContext.tsx     # Transaction & Category logic
+│   └── ThemeContext.tsx      # Dark mode management
 ├── screens/
-│   ├── LoginScreen.tsx       # Login page
-│   ├── SignUpScreen.tsx      # Sign up page
-│   ├── HomeScreen.tsx        # Books list
-│   ├── BookDetailScreen.tsx  # Book details & delete
-│   ├── BookFormScreen.tsx    # Add/edit book form
-│   └── ProfileScreen.tsx     # User profile
-├── components/
-│   └── LoadingSpinner.tsx    # Loading component
+│   ├── LoginScreen.tsx
+│   ├── SignUpScreen.tsx
+│   ├── HomeScreen.tsx        # Budget book list
+│   ├── BudgetDetailScreen.tsx# Charts & transaction history
+│   ├── EntryFormScreen.tsx   # Add/Edit transactions
+│   └── ProfileScreen.tsx     # Avatar & settings
 ├── navigation/
-│   └── RootNavigator.tsx     # Navigation setup
-└── types/
-    └── index.ts              # TypeScript types
+│   └── RootNavigator.tsx     # App routing logic
 ```
 
-## Next Steps (Optional Enhancements)
-- [ ] Add book ratings and reviews
-- [ ] Implement book wishlist/sharing
-- [ ] Add offline sync
-- [ ] Dark mode support
-- [ ] Advanced filtering and sorting
-- [ ] Book recommendations
-- [ ] Social features
+## Security
+This app uses Firebase Security Rules to ensure users can only access their own data.
+- **Firestore**: Rules restrict access per `userId`.
+- **Storage**: User avatars are stored in `avatars/{userId}` and restricted to the owner.
 
 ## Troubleshooting
-- **Firebase not connecting**: Check your `.env` file and Firebase config
-- **Image upload failing**: Verify Cloud Storage rules and permissions
-- **Auth errors**: Clear app cache and try again
-- **Expo issues**: Run `expo doctor` to diagnose problems
-
-## Support
-For issues with:
-- **Firebase**: Check [Firebase Docs](https://firebase.google.com/docs)
-- **React Native**: Check [React Native Docs](https://reactnative.dev)
-- **Expo**: Check [Expo Docs](https://docs.expo.dev)
+- **Icons not showing**: Ensure `expo-font` is installed and fonts are loaded in `App.tsx`.
+- **Firebase Persistence**: On web, standard browser persistence is used; on native, `AsyncStorage` is used via `getReactNativePersistence`.

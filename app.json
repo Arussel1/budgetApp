@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "book-budget-app",
-    "slug": "book-budget-app",
+    "name": "Vault",
+    "slug": "vault",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,7 +20,10 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -40,7 +43,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "aa6e5647-34c8-4cf9-bd3a-6472b4f00bad"
+        "projectId": "8ba2b443-2507-4599-80c2-925080ab1577"
       }
     }
   }

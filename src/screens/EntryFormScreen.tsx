@@ -538,6 +538,14 @@ const EntryFormScreen: React.FC<Props> = ({ navigation, route }) => {
                   </Text>
                 )}
               </TouchableOpacity>
+
+              <TouchableOpacity 
+                 style={[styles.cancelButton, { borderColor: theme.border, backgroundColor: theme.surface }]} 
+                 onPress={() => navigation.goBack()}
+                 disabled={loading}
+              >
+                 <Text style={[styles.cancelButtonText, { color: theme.textSecondary }]}>Cancel</Text>
+              </TouchableOpacity>
             </View>
           )}
         </Formik>
@@ -917,6 +925,17 @@ const styles = StyleSheet.create({
   addCategoryChip: {
     backgroundColor: '#fff',
     borderStyle: 'dashed',
+  },
+  cancelButton: {
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 12,
+    borderWidth: 1,
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   addCategoryText: {
     fontSize: 14,
